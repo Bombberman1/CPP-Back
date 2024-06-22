@@ -12,8 +12,8 @@ int main() {
         return 1;
     }
     std::cout << "Server is live\n";
-    while(get_data(&wsa_socket) == 0) {
-
+    while(true) {
+        if(get_data(&wsa_socket) != 0) break;
     }
 
     return 1;

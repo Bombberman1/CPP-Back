@@ -1,5 +1,6 @@
 #include "socket.h"
-#include "iostream"
+#include <iostream>
+#include <fstream>
 
 
 int create_wsa(WSA_Socket* obj) {
@@ -91,6 +92,7 @@ int get_data(WSA_Socket* obj) {
             "Connection: Closed\r\n"
             "\r\n"
             "<!DOCTYPE html>"
+            "<meta charset=\"UTF-8\">"
             "<html>"
             "<head>"
             "<title>SEEEEMEN</title>"
@@ -100,7 +102,36 @@ int get_data(WSA_Socket* obj) {
             "</body>"
             "</html>";
 
-        int res = send(obj -> client_socket, httpData, sizeof(httpData) - 1, 0);
+        int res;
+        if(obj -> buffer[5] == 'f') {
+            const char ico_headers[] = 
+                "HTTP/1.1 200 OK\r\n"
+                "Content-Type: image/x-icon\r\n"
+                "Connection: Closed\r\n"
+                "\r\n";
+
+            res = send(obj -> client_socket, ico_headers, sizeof(ico_headers) - 1, 0);
+
+            std::ifstream ico_file("c_icon_132529.ico", std::ios::binary);
+            if(!ico_file) {
+                std::cout << "Can't open file\n";
+                
+                return 1;
+            }
+            ico_file.seekg(0, std::ios::end);
+            int size = ico_file.tellg();
+            ico_file.seekg(0, std::ios::beg);
+            char *buff = new char[size];
+            ico_file.read(buff, size);
+            ico_file.close();
+
+            res = send(obj -> client_socket, buff, size, 0);
+
+            delete[] buff;
+        } else {
+            res = send(obj -> client_socket, httpData, sizeof(httpData) - 1, 0);
+        }
+        
         if(res == SOCKET_ERROR) {
             std::cout << "Send Error\n";
             closesocket(obj -> listen_socket);
@@ -109,7 +140,7 @@ int get_data(WSA_Socket* obj) {
 
             return 1;
         }
-        std::cout << "Sended: " << res << " bytes\n";
+        std::cout << "Sended: " << res << " bytes\n\n";
 
         closesocket(obj -> client_socket);
 
