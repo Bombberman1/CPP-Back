@@ -3,6 +3,7 @@
 #include "winsock2.h"
 #include "ws2tcpip.h"
 #pragma comment(lib, "Ws2_32.lib")
+#include "http.h"
 #define BUFF_LEN 1024
 
 
@@ -23,7 +24,7 @@ int create_tcp_socket(WSA_Socket* obj);
 int listen_connections(WSA_Socket* obj);
 SOCKET accept_connections(WSA_Socket* obj);
 int close_connection(WSA_Socket* obj);
-int get_data(WSA_Socket* obj);
+int get_data(WSA_Socket* obj, HashMap *get_map, HashMap *post_map, HashMap *put_map, HashMap *delete_map);
 int create_all_sockets(WSA_Socket* obj, const char* ip, const char* port);
 
 

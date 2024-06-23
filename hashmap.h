@@ -19,11 +19,12 @@ class HashNode {
         }
         bool arr_equal(const char *arr1, const char *arr2) {
             if(arr1 == nullptr) return false;
-            for(char i = 0; arr1[i] != 0 || arr2[i] != 0; i++) {
+            short i = 0;
+            for(; arr1[i] != 0 && arr2[i] != 0; i++) {
                 if(arr1[i] != arr2[i]) return false;
             }
             
-            return true;
+            return (arr1[i] == 0 && arr2[i] == 0);
         }
     public:
         HashNode(const char *key) : key(arr_copy(key)), value(nullptr), next(nullptr) {}
@@ -57,12 +58,11 @@ class HashMap {
     private:
         HashNode **map;
         HashNode *start;
-        template <char L>
-        int get_hash(const char (&arr)[L]) {
+        int get_hash(const char *arr) {
             const short symbols_count = 256;
             int hash = arr[0] % HASH_COUNT;
 
-            for(unsigned char i = 1; i < L - 1; i++) {
+            for(unsigned char i = 1; arr[i] != '\0'; i++) {
                 hash *= symbols_count;
                 hash += arr[i];
                 hash %= HASH_COUNT;
@@ -75,8 +75,7 @@ class HashMap {
             map = new HashNode *[HASH_COUNT]();
             start = nullptr;
         }
-        template <char L>
-        HashNode& operator[](const char (&key)[L]) {
+        HashNode& operator[](const char *key) {
             int hash = get_hash(key);
             if(map[hash]) {
                 return *map[hash];
@@ -96,7 +95,20 @@ class HashMap {
 
             return *map[hash];
         }
-        friend std::ostream& operator<<(std::ostream& os, const HashMap& map);
+        bool is_key(const char *key) {
+            int hash = get_hash(key);
+            
+            return map[hash] != nullptr;
+        }
+        friend std::ostream& operator<<(std::ostream& os, const HashMap& map) {
+            HashNode *p = map.start;
+            while(p) {
+                os << p -> get_key() << ": " << p -> get_value() << '\n';
+                p = p -> get_next();
+            }
+            
+            return os;
+        }
         ~HashMap() {
             HashNode *p = start;
             while(p) {
@@ -107,13 +119,3 @@ class HashMap {
             delete[] map;
         }
 };
-
-std::ostream& operator<<(std::ostream& os, const HashMap& map) {
-    HashNode *p = map.start;
-    while(p) {
-        os << p -> get_key() << ": " << p -> get_value() << '\n';
-        p = p -> get_next();
-    }
-    
-    return os;
-}
